@@ -3,6 +3,7 @@ package me.mrCookieSlime.Slimefun;
 import java.io.File;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -302,7 +303,7 @@ public class SlimefunStartup extends JavaPlugin {
 					public void run() {
 						for(Player p : Bukkit.getOnlinePlayers()) {
 							for(ItemStack armor : p.getInventory().getArmorContents()) {
-								if(armor != null) {
+								if(armor != null && armor.getType() != Material.CHAINMAIL_HELMET && armor.getType() != Material.CHAINMAIL_CHESTPLATE && armor.getType() != Material.CHAINMAIL_LEGGINGS && armor.getType() != Material.CHAINMAIL_BOOTS) {
 									if(Slimefun.hasUnlocked(p, armor, true)) {
 										if(SlimefunItem.getByItem(armor) instanceof SlimefunArmorPiece) {
 											for(PotionEffect effect : ((SlimefunArmorPiece) SlimefunItem.getByItem(armor)).getEffects()) {
