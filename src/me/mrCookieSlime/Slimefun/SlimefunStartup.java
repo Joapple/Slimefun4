@@ -77,44 +77,43 @@ import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 
 public class SlimefunStartup extends JavaPlugin {
-
+	
 	public static SlimefunStartup instance;
-
+	
 	static PluginUtils utils;
 	static Config researches;
 	static Config items;
 	static Config whitelist;
-	static Config config;
-
+	public static Config config;
+	
 	public static TickerTask ticker;
-
+	
 	private CoreProtectAPI coreProtectAPI;
-
+	
 	private boolean clearlag = false;
 	private boolean exoticGarden = false;
 	private boolean coreProtect = false;
-
+	
 	// Supported Versions of Minecraft
 	final String[] supported = {"v1_9_", "v1_10_", "v1_11_", "PluginBukkitBridge"};
-
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
-		if (loader.load()) {
-
+		if(loader.load()) {
+			
 			boolean compatibleVersion = false;
-
-			for (String version: supported) {
-				if (ReflectionUtils.getVersion().startsWith(version)) {
+			
+			for(String version : supported) {
+				if(ReflectionUtils.getVersion().startsWith(version)) {
 					compatibleVersion = true;
 					break;
 				}
 			}
-
+			
 			// Looks like you are using an unsupported Minecraft Version
-			if (!compatibleVersion) {
+			if(!compatibleVersion) {
 				System.err.println("### Slimefun failed to load!");
 				System.err.println("###");
 				System.err.println("### You are using the wrong Version of Minecraft!!!");
@@ -128,21 +127,21 @@ public class SlimefunStartup extends JavaPlugin {
 				getServer().getPluginManager().disablePlugin(this);
 				return;
 			}
-
+			
 			instance = this;
 			System.out.println("[Slimefun] Loading Files...");
 			Files.cleanup();
-
+			
 			System.out.println("[Slimefun] Loading Config...");
-
+			
 			utils = new PluginUtils(this);
 			utils.setupConfig();
-
+			
 			// Loading all extra configs
 			researches = new Config(Files.RESEARCHES);
 			items = new Config(Files.ITEMS);
 			whitelist = new Config(Files.WHITELIST);
-
+			
 			// Init Config, Updater, Metrics and messages.yml
 			utils.setupUpdater(53485, getFile());
 			utils.setupMetrics();
@@ -150,42 +149,42 @@ public class SlimefunStartup extends JavaPlugin {
 			config = utils.getConfig();
 			Messages.local = utils.getLocalization();
 			Messages.setup();
-
+			
 			// Creating all necessary Folders
 			// TODO: Make a shortcut method such as createDir(path)
-			if (!new File("data-storage/Slimefun/blocks").exists()) new File("data-storage/Slimefun/blocks").mkdirs();
-			if (!new File("data-storage/Slimefun/stored-blocks").exists()) new File("data-storage/Slimefun/stored-blocks").mkdirs();
-			if (!new File("data-storage/Slimefun/stored-inventories").exists()) new File("data-storage/Slimefun/stored-inventories").mkdirs();
-			if (!new File("data-storage/Slimefun/stored-chunks").exists()) new File("data-storage/Slimefun/stored-chunks").mkdirs();
-			if (!new File("data-storage/Slimefun/universal-inventories").exists()) new File("data-storage/Slimefun/universal-inventories").mkdirs();
-			if (!new File("data-storage/Slimefun/waypoints").exists()) new File("data-storage/Slimefun/waypoints").mkdirs();
-			if (!new File("data-storage/Slimefun/block-backups").exists()) new File("data-storage/Slimefun/block-backups").mkdirs();
-			if (!new File("plugins/Slimefun/scripts").exists()) new File("plugins/Slimefun/scripts").mkdirs();
-			if (!new File("plugins/Slimefun/generators").exists()) new File("plugins/Slimefun/generators").mkdirs();
-			if (!new File("plugins/Slimefun/error-reports").exists()) new File("plugins/Slimefun/error-reports").mkdirs();
-			if (!new File("plugins/Slimefun/cache/github").exists()) new File("plugins/Slimefun/cache/github").mkdirs();
-
+			if(!new File("data-storage/Slimefun/blocks").exists()) new File("data-storage/Slimefun/blocks").mkdirs();
+			if(!new File("data-storage/Slimefun/stored-blocks").exists()) new File("data-storage/Slimefun/stored-blocks").mkdirs();
+			if(!new File("data-storage/Slimefun/stored-inventories").exists()) new File("data-storage/Slimefun/stored-inventories").mkdirs();
+			if(!new File("data-storage/Slimefun/stored-chunks").exists()) new File("data-storage/Slimefun/stored-chunks").mkdirs();
+			if(!new File("data-storage/Slimefun/universal-inventories").exists()) new File("data-storage/Slimefun/universal-inventories").mkdirs();
+			if(!new File("data-storage/Slimefun/waypoints").exists()) new File("data-storage/Slimefun/waypoints").mkdirs();
+			if(!new File("data-storage/Slimefun/block-backups").exists()) new File("data-storage/Slimefun/block-backups").mkdirs();
+			if(!new File("plugins/Slimefun/scripts").exists()) new File("plugins/Slimefun/scripts").mkdirs();
+			if(!new File("plugins/Slimefun/generators").exists()) new File("plugins/Slimefun/generators").mkdirs();
+			if(!new File("plugins/Slimefun/error-reports").exists()) new File("plugins/Slimefun/error-reports").mkdirs();
+			if(!new File("plugins/Slimefun/cache/github").exists()) new File("plugins/Slimefun/cache/github").mkdirs();
+			
 			SlimefunManager.plugin = this;
-
+			
 			System.out.println("[Slimefun] Loading Items...");
 			MiscSetup.setupItemSettings();
 			try {
 				SlimefunSetup.setupItems();
-			} catch (Exception e1) {
+			} catch(Exception e1) {
 				e1.printStackTrace();
 			}
 			MiscSetup.loadDescriptions();
-
+			
 			System.out.println("[Slimefun] Loading Researches...");
 			Research.enabled = getResearchCfg().getBoolean("enable-researching");
 			ResearchSetup.setupResearches();
-
+			
 			MiscSetup.setupMisc();
-
+			
 			BlockStorage.info_delay = config.getInt("URID.info-delay");
-
+			
 			System.out.println("[Slimefun] Loading World Generators...");
-
+			
 			// Generating Oil as an OreGenResource (its a cool API)
 			OreGenSystem.registerResource(new OilResource());
 			OreGenSystem.registerResource(new NetherIceResource());
@@ -206,63 +205,64 @@ public class SlimefunStartup extends JavaPlugin {
 			new FurnaceListener(this);
 			new TeleporterListener(this);
 			new AndroidKillingListener(this);
-
+			
 			// Toggleable Listeners for performance
-			if (config.getBoolean("items.talismans")) new TalismanListener(this);
-			if (config.getBoolean("items.backpacks")) new BackpackListener(this);
-			if (config.getBoolean("items.coolers")) new CoolerListener(this);
-
+			if(config.getBoolean("items.talismans")) new TalismanListener(this);
+			if(config.getBoolean("items.backpacks")) new BackpackListener(this);
+			if(config.getBoolean("items.coolers")) new CoolerListener(this);
+			
 			// Handle Slimefun Guide being given on Join
 			// TODO: Move it to its own class, was too lazy
-			if (config.getBoolean("options.give-guide-on-first-join")) {
+			if(config.getBoolean("options.give-guide-on-first-join")) {
 				getServer().getPluginManager().registerEvents(new Listener() {
-
+					
 					@EventHandler
 					public void onJoin(PlayerJoinEvent e) {
-						if (!e.getPlayer().hasPlayedBefore()) {
+						if(!e.getPlayer().hasPlayedBefore()) {
 							Player p = e.getPlayer();
-							if (!getWhitelist().getBoolean(p.getWorld().getName() + ".enabled")) return;
-							if (!getWhitelist().getBoolean(p.getWorld().getName() + ".enabled-items.SLIMEFUN_GUIDE")) return;
+							if(!getWhitelist().getBoolean(p.getWorld().getName() + ".enabled")) return;
+							if(!getWhitelist().getBoolean(p.getWorld().getName() + ".enabled-items.SLIMEFUN_GUIDE")) return;
 							p.getInventory().addItem(SlimefunGuide.getItem(config.getBoolean("guide.default-view-book")));
 						}
 					}
-
+					
 				}, this);
 			}
-
+			
 			// Load/Unload Worlds in Slimefun
 			// TODO: Move it to its own class, was too lazy
 			getServer().getPluginManager().registerEvents(new Listener() {
-
+				
 				@EventHandler
 				public void onWorldLoad(WorldLoadEvent e) {
 					BlockStorage.getForcedStorage(e.getWorld());
-
+					
 					SlimefunStartup.getWhitelist().setDefaultValue(e.getWorld().getName() + ".enabled", true);
 					SlimefunStartup.getWhitelist().setDefaultValue(e.getWorld().getName() + ".enabled-items.SLIMEFUN_GUIDE", true);
 					SlimefunStartup.getWhitelist().save();
 				}
-
+				
 				@EventHandler
 				public void onWorldUnload(WorldUnloadEvent e) {
 					BlockStorage storage = BlockStorage.getStorage(e.getWorld());
-					if (storage != null) storage.save(true);
-					else System.err.println("[Slimefun] Could not save Slimefun Blocks for World \"" + e.getWorld().getName() + "\"");
+					if(storage != null) storage.save(true);
+					else
+						System.err.println("[Slimefun] Could not save Slimefun Blocks for World \"" + e.getWorld().getName() + "\"");
 				}
-
+				
 			}, this);
-
+			
 			// Clear the Slimefun Guide History upon Player Leaving
 			// TODO: Move it to its own class, was too lazy
 			getServer().getPluginManager().registerEvents(new Listener() {
-
+				
 				@EventHandler
 				public void onDisconnect(PlayerQuitEvent e) {
-					if (SlimefunGuide.history.containsKey(e.getPlayer().getUniqueId())) SlimefunGuide.history.remove(e.getPlayer().getUniqueId());
+					if(SlimefunGuide.history.containsKey(e.getPlayer().getUniqueId())) SlimefunGuide.history.remove(e.getPlayer().getUniqueId());
 				}
-
+				
 			}, this);
-
+			
 			// Initiating various Stuff and all Items with a slightly delay (0ms after the Server finished loading)
 			getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 				@Override
@@ -270,17 +270,17 @@ public class SlimefunStartup extends JavaPlugin {
 					Slimefun.emeraldenchants = getServer().getPluginManager().isPluginEnabled("EmeraldEnchants");
 					SlimefunGuide.all_recipes = config.getBoolean("options.show-vanilla-recipes-in-guide");
 					MiscSetup.loadItems();
-
-					for (World world: Bukkit.getWorlds()) {
+					
+					for(World world : Bukkit.getWorlds()) {
 						new BlockStorage(world);
 					}
-
-					if (SlimefunItem.getByName("ANCIENT_ALTAR") != null) new AncientAltarListener((SlimefunStartup) instance);
+					
+					if(SlimefunItem.getByName("ANCIENT_ALTAR") != null) new AncientAltarListener(instance);
 				}
 			}, 0);
-
+			
 			// WorldEdit Hook to clear Slimefun Data upon //set 0 //cut or any other equivalent
-			if (getServer().getPluginManager().isPluginEnabled("WorldEdit")) {
+			if(getServer().getPluginManager().isPluginEnabled("WorldEdit")) {
 				try {
 					Class.forName("com.sk89q.worldedit.extent.Extent");
 					new WESlimefunManager();
@@ -290,29 +290,29 @@ public class SlimefunStartup extends JavaPlugin {
 					System.err.println("[Slimefun] Maybe consider updating WorldEdit or Slimefun?");
 				}
 			}
-
+			
 			getCommand("slimefun").setExecutor(new SlimefunCommand(this));
 			getCommand("slimefun").setTabCompleter(new SlimefunTabCompleter());
-
+			
 			// Armor Update Task
-			if (config.getBoolean("options.enable-armor-effects")) {
+			if(config.getBoolean("options.enable-armor-effects")) {
 				getServer().getScheduler().runTaskTimer(this, new Runnable() {
-
+					
 					@Override
 					public void run() {
-						for (Player p: Bukkit.getOnlinePlayers()) {
-							for (ItemStack armor: p.getInventory().getArmorContents()) {
-								if (armor != null) {
-									if (Slimefun.hasUnlocked(p, armor, true)) {
-										if (SlimefunItem.getByItem(armor) instanceof SlimefunArmorPiece) {
-											for (PotionEffect effect: ((SlimefunArmorPiece) SlimefunItem.getByItem(armor)).getEffects()) {
+						for(Player p : Bukkit.getOnlinePlayers()) {
+							for(ItemStack armor : p.getInventory().getArmorContents()) {
+								if(armor != null) {
+									if(Slimefun.hasUnlocked(p, armor, true)) {
+										if(SlimefunItem.getByItem(armor) instanceof SlimefunArmorPiece) {
+											for(PotionEffect effect : ((SlimefunArmorPiece) SlimefunItem.getByItem(armor)).getEffects()) {
 												p.removePotionEffect(effect.getType());
 												p.addPotionEffect(effect);
 											}
 										}
-										if (SlimefunManager.isItemSimiliar(armor, SlimefunItem.getItem("SOLAR_HELMET"), false)) {
-											if (p.getWorld().getTime() < 12300 || p.getWorld().getTime() > 23850) {
-												if (p.getEyeLocation().getBlock().getLightFromSky() == 15) {
+										if(SlimefunManager.isItemSimiliar(armor, SlimefunItem.getItem("SOLAR_HELMET"), false)) {
+											if(p.getWorld().getTime() < 12300 || p.getWorld().getTime() > 23850) {
+												if(p.getEyeLocation().getBlock().getLightFromSky() == 15) {
 													ItemEnergy.chargeInventory(p, Float.valueOf(String.valueOf(Slimefun.getItemValue("SOLAR_HELMET", "charge-amount"))));
 												}
 											}
@@ -320,18 +320,14 @@ public class SlimefunStartup extends JavaPlugin {
 									}
 								}
 							}
-
-							for (ItemStack radioactive: SlimefunItem.radioactive) {
-								if (p.getInventory().containsAtLeast(radioactive, 1) || SlimefunManager.isItemSimiliar(p.getInventory().getItemInOffHand(), radioactive, true)) {
-									if (SlimefunManager.isItemSimiliar(SlimefunItems.SCUBA_HELMET, p.getInventory().getHelmet(), true) &&
-										SlimefunManager.isItemSimiliar(SlimefunItems.HAZMATSUIT_CHESTPLATE, p.getInventory().getChestplate(), true) &&
-										SlimefunManager.isItemSimiliar(SlimefunItems.HAZMATSUIT_LEGGINGS, p.getInventory().getLeggings(), true) &&
-										SlimefunManager.isItemSimiliar(SlimefunItems.RUBBER_BOOTS, p.getInventory().getBoots(), true)) {
-
+							
+							for(ItemStack radioactive : SlimefunItem.radioactive) {
+								if(p.getInventory().containsAtLeast(radioactive, 1) || SlimefunManager.isItemSimiliar(p.getInventory().getItemInOffHand(), radioactive, true)) {
+									if(SlimefunManager.isItemSimiliar(SlimefunItems.SCUBA_HELMET, p.getInventory().getHelmet(), true) && SlimefunManager.isItemSimiliar(SlimefunItems.HAZMATSUIT_CHESTPLATE, p.getInventory().getChestplate(), true) && SlimefunManager.isItemSimiliar(SlimefunItems.HAZMATSUIT_LEGGINGS, p.getInventory().getLeggings(), true) && SlimefunManager.isItemSimiliar(SlimefunItems.RUBBER_BOOTS, p.getInventory().getBoots(), true)) {
+										
 										break;
 									}
-
-
+									
 									p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 400, 3));
 									p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 400, 3));
 									p.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 400, 3));
@@ -346,9 +342,9 @@ public class SlimefunStartup extends JavaPlugin {
 					}
 				}, 0L, config.getInt("options.armor-update-interval") * 20L);
 			}
-
+			
 			ticker = new TickerTask();
-
+			
 			// Starting all ASYNC Tasks
 			getServer().getScheduler().scheduleAsyncRepeatingTask(this, new AutoSavingTask(), 1200L, config.getInt("options.auto-save-delay-in-minutes") * 60L * 20L);
 			getServer().getScheduler().scheduleAsyncRepeatingTask(this, ticker, 100L, config.getInt("URID.custom-ticker-delay"));
@@ -357,7 +353,7 @@ public class SlimefunStartup extends JavaPlugin {
 				
 				@Override
 				public void run() {
-					for (GitHubConnector connector: GitHubConnector.connectors) {
+					for(GitHubConnector connector : GitHubConnector.connectors) {
 						connector.pullFile();
 					}
 				}
@@ -365,32 +361,31 @@ public class SlimefunStartup extends JavaPlugin {
 			
 			// Hooray!
 			System.out.println("[Slimefun] Finished!");
-
+			
 			clearlag = getServer().getPluginManager().isPluginEnabled("ClearLag");
-
+			
 			coreProtect = getServer().getPluginManager().isPluginEnabled("CoreProtect");
-
-            Bukkit.getScheduler().scheduleSyncDelayedTask(this, new BukkitRunnable() {
-                @Override
-                public void run() {
-                    exoticGarden = getServer().getPluginManager().isPluginEnabled("ExoticGarden"); //Had to do it this way, otherwise it seems disabled.
-                }
-            }, 0);
-
-			if (clearlag) new ClearLaggIntegration(this);
-
-			if (coreProtect) coreProtectAPI = ((CoreProtect)getServer().getPluginManager().getPlugin("CoreProtect")).getAPI();
-
-
+			
+			Bukkit.getScheduler().scheduleSyncDelayedTask(this, new BukkitRunnable() {
+				@Override
+				public void run() {
+					exoticGarden = getServer().getPluginManager().isPluginEnabled("ExoticGarden"); //Had to do it this way, otherwise it seems disabled.
+				}
+			}, 0);
+			
+			if(clearlag) new ClearLaggIntegration(this);
+			
+			if(coreProtect) coreProtectAPI = ((CoreProtect) getServer().getPluginManager().getPlugin("CoreProtect")).getAPI();
+			
 			SlimefunGuide.creative_research = config.getBoolean("options.allow-free-creative-research");
-
+			
 			AutoEnchanter.max_emerald_enchantments = config.getInt("options.emerald-enchantment-limit");
-
+			
 			// Do not show /sf elevator command in our Log, it could get quite spammy
 			CSCoreLib.getLib().filterLog("([A-Za-z0-9_]{3,16}) issued server command: /sf elevator (.{0,})");
 		}
 	}
-
+	
 	@Override
 	public void onDisable() {
 		Bukkit.getScheduler().cancelTasks(this);
@@ -400,20 +395,19 @@ public class SlimefunStartup extends JavaPlugin {
 		ticker.run();
 		
 		try {
-			for (World world: Bukkit.getWorlds()) {
+			for(World world : Bukkit.getWorlds()) {
 				BlockStorage storage = BlockStorage.getStorage(world);
-				if (storage != null) {
+				if(storage != null) {
 					storage.save(true);
-				}
-				else {
+				} else {
 					System.err.println("[Slimefun] Could not save Slimefun Blocks for World \"" + world.getName() + "\"");
 				}
 			}
-
+			
 			SlimefunBackup.start();
 		} catch(Exception x) {
 		}
-
+		
 		config = null;
 		researches = null;
 		items = null;
@@ -471,48 +465,48 @@ public class SlimefunStartup extends JavaPlugin {
 		SlimefunGuide.contributors = null;
 		GitHubConnector.connectors = null;
 		ChestManipulator.listeners = null;
-
-		for (Player p: Bukkit.getOnlinePlayers()) {
+		
+		for(Player p : Bukkit.getOnlinePlayers()) {
 			p.closeInventory();
 		}
 	}
-
+	
 	public static Config getCfg() {
 		return config;
 	}
-
+	
 	public static Config getResearchCfg() {
 		return researches;
 	}
-
+	
 	public static Config getItemCfg() {
 		return items;
 	}
-
+	
 	public static Config getWhitelist() {
 		return whitelist;
 	}
-
+	
 	public static int randomize(int max) {
 		return CSCoreLib.randomizer().nextInt(max);
 	}
-
+	
 	public static boolean chance(int max, int percentage) {
 		return CSCoreLib.randomizer().nextInt(max) <= percentage;
 	}
-
+	
 	public boolean isClearLagInstalled() {
 		return clearlag;
 	}
-
-	public boolean isExoticGardenInstalled () {
+	
+	public boolean isExoticGardenInstalled() {
 		return exoticGarden;
 	}
-
+	
 	public boolean isCoreProtectInstalled() {
 		return coreProtect;
 	}
-
+	
 	public CoreProtectAPI getCoreProtectAPI() {
 		return coreProtectAPI;
 	}
